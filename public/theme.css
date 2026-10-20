@@ -1,0 +1,351 @@
+/* Hub visual layer: warm cream canvas, amber accent, 12px cards with soft shadows.
+   Loaded last so it refines the base layout sheets without changing their structure. */
+:root {font-size:14px;line-height:1.5;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body {color:var(--text)}
+::selection {background:color-mix(in srgb,var(--primary) 26%,transparent)}
+* {scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 40%,transparent) transparent}
+button,.button,.nav-item,.batch-card,.gallery-card,.suggestion,.tasks-card,.preset-card {transition:background .16s,border-color .16s,color .16s,box-shadow .2s,transform .2s}
+
+/* Type scale */
+.eyebrow {font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;color:var(--primary)}
+.field-label {font-size:12px;font-weight:500;gap:6px}
+.muted {color:var(--muted)}
+
+/* Controls */
+.button {border-radius:8px;min-height:36px;padding:0 16px;font-size:13px;font-weight:500;gap:8px;background:var(--surface);box-shadow:var(--card-shadow)}
+.button:hover {border-color:var(--primary);color:var(--primary)}
+.button.primary {box-shadow:0 1px 2px color-mix(in srgb,var(--primary) 30%,transparent)}
+.button.primary:hover {background:var(--primary-strong);border-color:var(--primary-strong);color:var(--primary-text)}
+.button.danger:hover {border-color:var(--danger);color:var(--danger)}
+.button.small,.admin-panel .button {min-height:30px;padding:0 11px;font-size:12px}
+.text-button {font-size:13px;font-weight:500}
+.text-button:hover {color:var(--primary-strong)}
+.icon-button {border-radius:8px}.icon-button:hover {background:var(--hover);color:var(--text)}
+input,select,textarea {border-radius:8px;font-size:13px;background:var(--surface);transition:border-color .16s,box-shadow .16s}
+input:hover,select:hover,textarea:hover {border-color:color-mix(in srgb,var(--primary) 45%,var(--line))}
+input:focus,select:focus,textarea:focus {outline:0;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 16%,transparent)}
+input:focus-visible,select:focus-visible,textarea:focus-visible {outline:0}
+input[type=checkbox],input[type=radio] {accent-color:var(--primary)}
+.setting-switch:checked {border-color:var(--primary)}
+
+/* Brand */
+.brand {color:var(--text);gap:11px}
+.brand strong {font-size:16px;font-weight:700;letter-spacing:.12em}
+.brand small {font:600 9px ui-monospace,monospace;letter-spacing:.18em;margin-top:3px;color:var(--primary)}
+.brand-mark {color:var(--primary);background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--primary) 22%,transparent),transparent 70%)}
+
+/* Shell */
+.side-nav {background:var(--surface);padding-top:22px}
+.side-nav .brand {margin:2px 10px 34px}
+.workspace-label {font-size:12px;letter-spacing:0;margin-bottom:12px}
+.nav-item {font-size:14px;padding:10px 12px;margin:2px 0;border-radius:8px;color:var(--muted);position:relative}
+.nav-item:hover {background:var(--hover);color:var(--text)}
+.nav-item.active {background:var(--soft);color:var(--primary-strong);font-weight:600}
+.nav-item.active:before {content:'';position:absolute;left:-12px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--primary)}
+.nav-dot {display:none}
+.sidebar-note {font-size:10px;opacity:.7;margin-bottom:16px}
+.profile {padding:14px 8px 0}
+.avatar {background:var(--soft);color:var(--primary-strong);font:600 14px system-ui,sans-serif}
+.profile-copy strong {font-size:13px;font-weight:600}
+.profile-copy small {font-size:12px;margin-top:2px}
+.logout {border-radius:8px}.logout:hover {background:var(--hover);color:var(--primary)}
+.topbar {height:56px;padding:0 24px;background:var(--surface)}
+.page-view .topbar {background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(8px)}
+.queue-status {font-size:13px;gap:10px}
+.rail-toggle {font-size:13px;font-weight:500;border-radius:8px;padding:6px 12px;background:var(--surface);color:var(--text)}
+.rail-toggle:hover {border-color:var(--primary);color:var(--primary)}
+.mobile-menu,.mobile-batches {color:var(--text)}
+
+/* Generate canvas */
+.canvas-wrap {background:var(--bg)}
+.canvas-result-head,.canvas-result-foot {font-size:13px}
+.canvas-result-head>span:first-child {font-weight:600;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--primary-strong);font-size:12px}
+.canvas-result-foot .text-button {font-size:13px}
+.result-tile {border-radius:var(--radius);background:var(--surface);box-shadow:var(--card-shadow)}
+.result-tile:hover {box-shadow:var(--card-hover-shadow)}
+.empty-canvas h2 {font-size:28px;font-weight:650;letter-spacing:-.01em}
+.empty-canvas>p:not(.eyebrow) {font-size:14px;line-height:1.7}
+.suggestion {font-size:13px;padding:8px 14px;border-radius:999px;background:var(--surface);color:var(--text);box-shadow:var(--card-shadow)}
+.suggestion svg {color:var(--primary)}
+.suggestion:hover {border-color:var(--primary);color:var(--primary);background:var(--surface)}
+.generation-state h2 {font-size:24px;font-weight:650}
+.generation-state p {font-size:14px}
+.generation-spinner {border-width:2px;border-color:var(--soft);border-top-color:var(--primary)}
+
+/* Composer: floating card above the canvas */
+.composer {margin:0 24px 20px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--card-hover-shadow);padding:14px 20px 16px}
+.composer:focus-within {border-color:color-mix(in srgb,var(--primary) 55%,var(--line))}
+.composer-title {font-size:13px;font-weight:600;color:var(--primary)}
+.mode-switch {border-radius:8px;padding:3px;background:var(--bg)}
+.mode-switch button {font-size:12px;padding:5px 12px;border-radius:6px}
+.mode-switch button:hover {color:var(--text)}
+.mode-switch .selected {background:var(--surface);color:var(--primary);font-weight:600;box-shadow:var(--card-shadow)}
+.composer>textarea {font-size:15px;line-height:1.6;box-shadow:none}
+.composer>textarea:focus {box-shadow:none}
+.composer-row .field-label,.advanced-grid .field-label,.preset-toolbar .field-label {font-size:12px}
+.composer-row input,.composer-row select {height:36px;font-size:13px;background:var(--bg)}
+.advanced-grid input,.advanced-grid select,.advanced-grid textarea,.preset-toolbar input,.preset-toolbar select {font-size:13px;background:var(--bg)}
+.composer-row input:focus,.composer-row select:focus,.advanced-grid :is(input,select,textarea):focus {background-color:var(--surface)}
+.preset-toolbar .button {font-size:13px}
+.preset-hint {font-size:12px}
+.keyboard-hint {font-size:11px}
+.generate-button {min-height:38px;padding:0 20px;font-size:14px;font-weight:600}
+
+/* Queue rail */
+.right-rail {background:var(--surface)}
+.rail-head {padding-bottom:16px}
+.rail-head .eyebrow {font-size:10px;margin-bottom:4px}
+.rail-head h3 {font-size:16px;font-weight:650}
+.rail-empty p {font-size:14px;color:var(--text)}
+.rail-empty small {font-size:12px}
+.rail-empty svg {color:var(--primary);opacity:.7}
+.batch-card {border:1px solid var(--line);border-radius:var(--radius);background:var(--bg)}
+.batch-card.selected,.batch-card:hover {border-color:color-mix(in srgb,var(--primary) 50%,var(--line));background:var(--surface);box-shadow:var(--card-hover-shadow)}
+.batch-thumbnails {border-radius:8px}
+.batch-meta strong {font-size:13px;font-weight:600}
+.batch-meta>span,.batch-caption,.batch-caption small {font-size:12px}
+.thumb-placeholder {font-size:13px;color:var(--primary-strong)}
+.queue-item-actions small {font-size:12px}
+.queue-item-actions .text-button {font-size:12px}
+.rail-footer {font-size:13px;font-weight:500}
+.rail-footer:hover {color:var(--primary-strong)}
+
+/* Pages */
+.page-heading h1 {font-size:30px;font-weight:700;letter-spacing:-.02em}
+.page-heading>p:last-child {font-size:14px}
+.history-tools {border-radius:var(--radius);box-shadow:var(--card-shadow);padding:8px 8px 8px 16px}
+.history-tools svg {color:var(--muted)}
+.history-tools input[type=search] {font-size:14px;box-shadow:none}
+.history-tools input[type=date],.history-tools select {font-size:13px}
+.history-selection-bar {font-size:13px}
+.history-selection-bar .button {font-size:13px}
+.timeline .eyebrow {font-size:10px}
+.timeline button {font-size:13px;padding:6px 10px;margin-left:-10px;border-radius:6px}
+.timeline button:hover {background:var(--hover);color:var(--text)}
+.timeline button.selected {background:var(--soft);color:var(--primary-strong)}
+.history-day h3 {font-size:14px;font-weight:650}
+.gallery-card {border-radius:var(--radius);box-shadow:var(--card-shadow)}
+.gallery-card:hover {box-shadow:var(--card-hover-shadow);transform:translateY(-2px)}
+.gallery-card.selected {outline-color:var(--primary)}
+.stack-layer {border-radius:var(--radius)}
+.gallery-details>p {font-size:13px}
+.gallery-info {font-size:12px}
+.gallery-actions .text-button {font-size:12px}
+.gallery-select,.gallery-count {border-radius:6px;background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(4px)}
+.gallery-count {font-size:12px;font-weight:600}
+.empty-page {font-size:14px}
+.empty-page h3 {font-size:18px;font-weight:650}
+
+/* Settings */
+.settings-profile h3 {font-size:18px;font-weight:650}
+.settings-profile p {font-size:13px}
+.setting-section h3,.setting-row strong {font-size:15px;font-weight:650}
+.setting-section>p,.setting-row p {font-size:13px}
+.theme-choice {border-radius:var(--radius);box-shadow:var(--card-shadow)}
+.theme-choice:hover {border-color:color-mix(in srgb,var(--primary) 50%,var(--line))}
+.theme-choice strong {font-size:13px}
+.theme-preview {border-radius:8px}
+.preference-badge {font-size:12px;font-weight:500}
+.check-row {font-size:13px}
+.pill,.tasks-status {font-size:11px;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--primary-strong)}
+.pill.off {background:color-mix(in srgb,var(--muted) 14%,transparent);color:var(--muted)}
+
+/* Auth */
+.auth-panel {background:var(--bg)}
+.auth-form-wrap h1 {font-size:34px;font-weight:700;letter-spacing:-.02em}
+.auth-description {font-size:14px;line-height:1.75}
+.beta-tag {font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--soft);width:max-content}
+.auth-form .field-label {font-size:13px}
+.auth-form input {height:44px;font-size:14px}
+.auth-form .wide {height:46px;font-size:14px;font-weight:600}
+.auth-form-wrap>.text-button {font-size:13px}
+.auth-footnote {font-size:12px}
+.art-caption h2 {font-size:34px;font-weight:600}
+.art-caption>p:last-child {font-size:14px}
+.art-caption .eyebrow {font-size:11px;color:#e6b85c}
+.auth-art .brand small {color:#e6b85c}
+.auth-art .brand-mark {color:#fffdf7}
+
+/* Feedback, dialogs */
+.toast {font-size:13px;border-radius:10px;padding:12px 16px;box-shadow:var(--shadow)}
+.image-dialog,.confirm-dialog,.batch-dialog {border-radius:16px;box-shadow:0 24px 80px #0000004d}
+.image-dialog::backdrop,.confirm-dialog::backdrop,.batch-dialog::backdrop {background:#1c211dcc;backdrop-filter:blur(6px)}
+.image-dialog>img {border-radius:8px}
+.dialog-caption {font-size:12px}
+.dialog-close:hover {color:var(--primary);border-color:var(--primary)}
+.confirm-dialog h2 {font-size:19px;font-weight:650}
+.confirm-dialog p {font-size:14px;line-height:1.7}
+.batch-dialog-head h2 {font-size:18px;font-weight:650}
+.batch-dialog-image {border-radius:8px;overflow:hidden}
+.batch-dialog-actions label {font-size:13px}
+
+/* Admin */
+.admin-tabs button {font-size:14px;font-weight:500;padding:10px 14px}
+.admin-tabs button:hover {color:var(--text)}
+.admin-tabs .active {font-weight:600}
+.admin-panel {border-radius:var(--radius);box-shadow:var(--card-shadow)}
+.admin-panel h3 {font-size:16px;font-weight:650}
+.admin-panel p {font-size:13px}
+.admin-panel table {font-size:13px}
+.admin-panel th {font-size:12px;font-weight:600;background:var(--bg)}
+.admin-panel tbody tr:hover td {background:var(--hover)}
+.admin-panel code {font-size:12px;padding:1px 6px;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
+.admin-form .field-label {font-size:12px}
+
+/* Tasks and presets */
+.tasks-heading h1 {font-size:30px;font-weight:700;letter-spacing:-.02em}
+.tasks-limit {font-size:12px;background:var(--surface)}
+.tasks-panel {border-radius:var(--radius);box-shadow:var(--card-shadow)}
+.tasks-panel-title h2,.tasks-section-head h3 {font-size:16px;font-weight:650}
+.tasks-check,.tasks-preview,.tasks-page-row,.tasks-settings-summary {font-size:13px}
+.tasks-card {border-radius:10px}
+.tasks-card:hover {border-color:color-mix(in srgb,var(--primary) 50%,var(--line))}
+.tasks-card.selected {background:var(--surface);box-shadow:var(--card-hover-shadow)}
+.tasks-card-title strong {font-size:14px;font-weight:600}
+.tasks-card-meta {font-size:12px}
+.tasks-progress {height:6px;background:var(--soft)}
+.tasks-empty h3 {font-size:15px}.tasks-empty p {font-size:13px}
+.tasks-gallery-image {border-radius:8px;overflow:hidden}
+.tasks-gallery-item small {font-size:12px}
+.tasks-gallery-item .text-button {font-size:12px}
+.task-parameter-section {border-radius:10px}
+.task-parameter-section summary {font-size:14px;font-weight:600}
+.task-params .field-label {font-size:12px}
+.task-params-note {font-size:12px}
+.preset-manager-heading h2 {font-size:17px;font-weight:650}
+.preset-manager-heading p {font-size:13px}
+.preset-card {border-radius:10px;box-shadow:var(--card-shadow)}
+.preset-card:hover {border-color:color-mix(in srgb,var(--primary) 50%,var(--line))}
+.preset-card-main strong {font-size:14px}
+.preset-card-main small {font-size:12px}
+.preset-active {font-size:11px;font-weight:600;padding:2px 9px}
+
+.theme-preview i:first-child {background:color-mix(in srgb,var(--primary) 30%,transparent)}
+.admin-form .button {min-height:36px;padding:0 16px;font-size:13px}
+
+/* Responsive layer: desktop, iPad (drawer queue, icon nav) and iPhone (portrait + landscape). */
+:root {--gutter:24px;--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px);--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+html {-webkit-text-size-adjust:100%;text-size-adjust:100%}
+select:not([multiple]) {appearance:none;-webkit-appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23948f80' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:12px}
+input[type=date] {min-height:38px}
+.composer-row select:not([multiple]),.advanced-grid select:not([multiple]),.preset-toolbar select:not([multiple]) {padding-right:26px;background-position:right 8px center}
+.composer-submit {margin-left:auto}
+.result-tile {background:transparent;box-shadow:none;border-radius:8px}
+.result-tile:hover {box-shadow:none}
+.result-tile img {transition:opacity .16s}.result-tile:hover img {opacity:.92}
+.canvas-result {max-width:min(1200px,100%)}
+.canvas-result {container-type:size}
+.result-grid {width:100%;margin-inline:auto}
+.composer {align-self:center;width:min(1240px,calc(100% - var(--gutter)*2));margin:0 0 20px}
+.topbar {height:calc(56px + var(--safe-t));padding-top:var(--safe-t)}
+.single-counter {font-size:12px}
+
+@media(min-width:1700px){
+  :root {--gutter:32px}
+  .topbar {height:calc(64px + var(--safe-t))}
+  .canvas-wrap {padding:28px 40px}
+  .history-grid {grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}.gallery-image,.gallery-pending {height:260px}
+}
+
+/* iPad portrait and small landscape: icon rail stays, queue becomes a drawer. */
+@media(min-width:761px) and (max-width:1024px){
+  .workspace-shell,.workspace-shell.view-generate.rail-hidden {grid-template-columns:185px minmax(0,1fr)}
+  .right-rail {position:fixed;right:0;top:0;bottom:0;width:min(320px,85vw);transform:translateX(105%);transition:transform .22s;z-index:20;box-shadow:var(--shadow);padding:calc(24px + var(--safe-t)) calc(18px + var(--safe-r)) var(--safe-b) 18px}
+  .right-rail.is-open {transform:translateX(0)}
+  .rail-close {display:grid}
+  .batch-thumbnails {height:140px}
+  .history-grid {grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+}
+@media(min-width:761px) and (max-width:960px){
+  .workspace-shell,.workspace-shell.view-generate.rail-hidden {grid-template-columns:72px minmax(0,1fr)}
+  .side-nav {padding-top:calc(22px + var(--safe-t))}
+  .side-nav .brand {margin:2px auto 30px}
+  .nav-item {padding:12px 5px}.nav-item.active:before {left:-10px}
+  .history-layout {grid-template-columns:96px minmax(0,1fr)}
+  .tasks-layout {grid-template-columns:1fr}.tasks-result-panel {grid-column:auto}
+}
+
+/* iPhone */
+@media(max-width:760px){
+  :root {--gutter:10px}
+  .side-nav {width:min(260px,82vw);padding:calc(24px + var(--safe-t)) 16px calc(16px + var(--safe-b)) calc(16px + var(--safe-l))}
+  .side-nav .nav-item {padding:12px 14px}.side-nav .nav-item.active:before {left:-16px}
+  .right-rail {width:min(320px,88vw);padding:calc(22px + var(--safe-t)) calc(16px + var(--safe-r)) var(--safe-b) 16px}
+  .topbar {padding:var(--safe-t) calc(16px + var(--safe-r)) 0 calc(16px + var(--safe-l))}
+  .canvas-wrap {padding:14px calc(14px + var(--safe-r)) 14px calc(14px + var(--safe-l))}
+  .composer {width:calc(100% - var(--gutter)*2 - var(--safe-l) - var(--safe-r));margin-bottom:max(10px,var(--safe-b));padding:12px 14px 14px}
+  .composer.expanded .advanced-grid {max-height:none;overflow:visible;padding-right:0}
+  .preset-hint {display:none}
+  .composer-row {gap:8px}
+  .composer-row>.field-label:not(:first-child):not(.composer-preset) {width:64px}
+  .generate-button {padding:0 16px;font-size:14px}
+  .suggestion {font-size:13px;padding:8px 13px}
+  .empty-canvas h2 {font-size:23px}.empty-canvas>p:not(.eyebrow) {font-size:13px}
+  .page-heading {padding:26px calc(18px + var(--safe-r)) 18px calc(18px + var(--safe-l))}
+  .page-heading h1,.tasks-heading h1 {font-size:26px}
+  .history-tools {margin:0 18px 18px;padding:10px;gap:8px}
+  .history-tools>svg {margin-left:4px}
+  .history-tools input[type=search] {flex:1 1 calc(100% - 40px);width:auto}
+  .history-tools input[type=date],.history-tools select {flex:1 1 calc(50% - 4px);width:auto}
+  .history-selection-bar {margin:0 18px 16px}
+  .history-layout {padding:0 18px 32px}
+  .timeline button {margin-left:0}
+  .history-grid {gap:10px}
+  .gallery-details>p {font-size:12px}
+  .gallery-actions {flex-wrap:wrap;gap:6px}
+  .settings-card,.admin-tabs,.admin-panel {margin-left:18px;margin-right:18px}
+  .admin-tabs {overflow-x:auto;scrollbar-width:none;gap:4px}.admin-tabs button {white-space:nowrap;flex-shrink:0}
+  .theme-options {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .setting-row {flex-wrap:wrap}
+  .setting-row p {font-size:12px}
+  .tasks-page {padding:26px 18px calc(32px + var(--safe-b))}
+  .tasks-panel {padding:16px}
+  .tasks-grid-options {flex-wrap:wrap}
+  .confirm-dialog,.batch-dialog {width:calc(100vw - 24px)}
+  .image-dialog {padding:12px}.image-dialog>img {max-width:calc(100vw - 48px)}
+  .auth-form-wrap h1 {font-size:29px}
+  .auth-panel {padding:calc(32px + var(--safe-t)) 24px calc(32px + var(--safe-b))}
+  .toast-region {left:12px;right:12px}.toast {max-width:none}
+}
+@media(max-width:380px){
+  .theme-options {grid-template-columns:1fr}.theme-preview {height:56px}
+  .history-grid {grid-template-columns:1fr}
+  .composer-row>.field-label:first-child,.composer-row>.field-label.composer-preset {flex-basis:100%}
+  .mode-switch button {padding:5px 9px}
+}
+
+/* Phone landscape and other short viewports: give the canvas room, keep the composer compact. */
+@media(max-height:520px) and (orientation:landscape){
+  .topbar {height:calc(46px + var(--safe-t))}
+  .canvas-wrap {padding-top:8px;padding-bottom:8px}
+  .empty-orbit,.empty-canvas .eyebrow {display:none}
+  .empty-canvas h2 {font-size:20px;margin:0 0 6px}.empty-canvas>p:not(.eyebrow) {margin:0}.suggestions {margin-top:12px}
+  .canvas-result-head {margin-bottom:6px}.canvas-result-foot {margin-top:6px}
+  .composer {padding:8px 14px 10px;margin-bottom:max(8px,var(--safe-b));max-height:62dvh}
+  .composer.expanded {max-height:82dvh}
+  .composer-heading {margin-bottom:4px}
+  .composer>textarea {min-height:40px;height:44px;padding-bottom:6px}
+  .composer-row {flex-wrap:nowrap;padding-top:8px}
+  .composer-row .field-label>span {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .composer-row>.field-label:first-child,.composer-row>.field-label.composer-preset {flex:1 1 0;min-width:90px}
+  .composer.expanded .advanced-grid {max-height:none;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .side-nav .brand {margin-bottom:16px}.side-nav .nav-item {padding-top:8px;padding-bottom:8px}.sidebar-note {display:none}
+  .page-heading {padding-top:18px;padding-bottom:12px}
+}
+
+/* Touch screens: no sticky hover lift, 16px fields so iOS does not zoom on focus, roomier targets. */
+@media(hover:none){
+  .gallery-card:hover {transform:none;box-shadow:var(--card-shadow)}
+  .result-tile:hover img {opacity:1}
+  .keyboard-hint {display:none}
+}
+@media(pointer:coarse){
+  input,select,textarea,.composer-row input,.composer-row select,.advanced-grid :is(input,select,textarea),.preset-toolbar :is(input,select),.history-tools :is(input,select),.auth-form input {font-size:16px}
+  .composer>textarea {font-size:16px}
+  .composer-row input,.composer-row select {height:40px}
+  .button {min-height:40px}.button.small,.admin-panel .button {min-height:36px}
+  .icon-button,.rail-close,.logout,.mobile-menu {min-width:40px;min-height:40px}
+  .text-button {min-height:32px}
+  .mode-switch button {padding:7px 12px}
+  .image-dot {width:11px;height:11px}
+}
