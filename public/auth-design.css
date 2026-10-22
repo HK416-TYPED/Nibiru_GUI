@@ -1,0 +1,51 @@
+/* The sign-in page shares the workspace's paper, survey grid and artwork. */
+.auth-shell {
+  --text:#1b1e20;--muted:#62696b;--surface:#fff;--line:#cdd1cb;
+  --primary:#204ded;--primary-strong:#1734a0;--primary-text:#fff;
+  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(390px,1fr);
+  background:#f3f4f0;color:var(--text);color-scheme:light;min-height:100dvh;
+}
+.auth-art {
+  isolation:isolate;position:relative;min-height:100dvh;padding:38px 40px;
+  background:#f8f8f2;border-right:1px solid #cdd1cb;overflow:hidden;color:#1b1e20;
+}
+.auth-illustration {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% top;z-index:-3}
+.auth-art:before {content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#f8f8f2e6 0%,#f8f8f220 25%,transparent 55%,#f8f8f2ef 88%,#f8f8f2),linear-gradient(90deg,#f8f8f240,transparent 45%)}
+.auth-art:after {content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle,#204ded55 .8px,transparent 1px) 0 0/8px 8px;mask-image:linear-gradient(0deg,#000,transparent 20%,transparent 85%,#000)}
+.auth-art .brand,.auth-art .brand strong {color:#1b1e20}
+.auth-art .brand small {color:#62696b}
+.auth-art .brand-mark {color:#1b1e20}
+.art-caption {left:40px;right:32px;bottom:110px}
+.art-caption .eyebrow {color:#353e42;font:10px/1.7 Consolas,monospace;max-width:390px;overflow-wrap:anywhere;letter-spacing:.05em;margin-bottom:15px}
+.art-wordmark {font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(72px,8.5vw,142px);font-weight:900;letter-spacing:-.04em;line-height:1;color:#171a1b}
+.art-bottom {left:40px;right:40px;bottom:34px;color:#424b4c;border-color:#87938b;font:10px/1.6 Consolas,monospace;gap:20px}
+.auth-panel,html[data-theme=dark] .auth-panel {
+  --text:#1b1e20;--muted:#62696b;--surface:#fff;--line:#cdd1cb;--primary:#204ded;--primary-text:#fff;
+  position:relative;min-height:100dvh;padding:48px 32px;color:var(--text);background-color:#f3f4f0;
+  background-image:url('/assets/workspace-terrain.svg'),linear-gradient(#6972531c 1px,transparent 1px),linear-gradient(90deg,#6972531c 1px,transparent 1px);
+  background-size:850px 700px,64px 64px,64px 64px;background-position:center bottom,0 0,0 0;
+}
+.auth-form-wrap {position:relative;max-width:410px;padding:32px;background:#fffffff2;border:1px solid #cdd1cb}
+.auth-form-wrap:before {content:'';position:absolute;left:-1px;top:-1px;width:56px;height:4px;background:#1b1e20}
+.auth-form-wrap:after {content:'+';position:absolute;right:10px;bottom:8px;font:20px monospace;color:#62696b;pointer-events:none}
+.beta-tag {display:table;border-radius:0;font:10px Consolas,monospace;color:#171a1b;background:#edf04b;padding:5px 8px;border-left:3px solid #171a1b;letter-spacing:.1em}
+.beta-tag .status-dot {display:none}
+.auth-form-wrap h1 {font-size:30px;font-weight:800;letter-spacing:.01em;margin:24px 0 12px}
+.auth-description {font-size:13px;line-height:1.8;margin:0 0 26px}
+.auth-form {gap:18px}
+.auth-form input {height:48px;border-radius:0;background:#fff;color:#1b1e20;border:1px solid #b7c0bb;padding:10px 12px}
+.auth-form input::placeholder {color:#737d7b;font-size:12px}
+.auth-form .field-label {font-size:13px;font-weight:600;gap:8px}
+.auth-form .wide {height:48px;border-radius:0;background:#171a1b;color:#fff;border:0;border-right:6px solid #edf04b;margin-top:8px;font-size:14px}
+.auth-form .wide:hover:not(:disabled) {background:#303b3e;color:#fff}
+.auth-form-wrap>.text-button {font-size:13px;line-height:1.7;margin-top:22px;color:#204ded}
+.auth-footnote {font-size:11px;line-height:1.6;letter-spacing:0;margin-top:28px;padding-top:18px}
+.auth-panel .mobile-brand {display:none}
+@media(max-width:1000px) and (min-width:761px){.auth-shell{grid-template-columns:minmax(0,1fr) 390px}.auth-panel{padding:30px 20px}.auth-form-wrap{padding:28px 24px}.art-caption,.art-bottom{left:28px;right:28px}.auth-art{padding:30px 28px}.art-wordmark{font-size:76px}}
+@media(max-width:760px){
+ .auth-shell{display:block}.auth-art{display:block;min-height:0;height:260px;padding:24px;border-right:0;border-bottom:1px solid #cdd1cb}
+ .auth-illustration{object-position:75% 15%}.auth-art:before{background:linear-gradient(90deg,#f8f8f2cc,transparent 65%),linear-gradient(0deg,#f8f8f2,transparent 65%)}
+ .auth-art .brand strong{font-size:22px}.art-caption{left:24px;right:24px;bottom:28px}.art-caption .eyebrow{font-size:8px;max-width:200px;margin-bottom:10px}.art-wordmark{font-size:64px}.art-bottom{display:none}
+ .auth-panel,html[data-theme=dark] .auth-panel{min-height:calc(100dvh - 260px);padding:24px 16px 40px;align-items:start}
+ .auth-form-wrap{max-width:440px;padding:28px 24px}.auth-form-wrap h1{font-size:26px}.auth-panel .mobile-brand{display:none}
+}

@@ -11,7 +11,7 @@ export async function setupAdmin(db,{username,password}){
   db.exec('BEGIN IMMEDIATE');
   try{
     if(db.prepare('SELECT 1 FROM users LIMIT 1').get())throw new Error('Database already initialized');
-    db.prepare('INSERT INTO users(username,password_hash,role,created_at) VALUES(?,?,?,?)').run(username,hash,'admin',new Date().toISOString());
+    db.prepare('INSERT INTO users(username,password_hash,role,created_at,preferences) VALUES(?,?,?,?,?)').run(username,hash,'admin',new Date().toISOString(),JSON.stringify({theme:'light',language:'zh'}));
     db.exec('COMMIT');
   }catch(error){db.exec('ROLLBACK');throw error;}
 }

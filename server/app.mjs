@@ -61,7 +61,7 @@ export function createApp(options={}) {
         db.exec('BEGIN IMMEDIATE');
         try{
           if(!setupRequired()){db.exec('ROLLBACK');return err(res,409,'Setup already completed');}
-          const row=db.prepare('INSERT INTO users(username,password_hash,role,created_at) VALUES(?,?,?,?)').run(body.username,hashed,'admin',now());
+          const row=db.prepare('INSERT INTO users(username,password_hash,role,created_at,preferences) VALUES(?,?,?,?,?)').run(body.username,hashed,'admin',now(),JSON.stringify({theme:'light',language:'zh'}));
           db.prepare('INSERT INTO models(name,kind,filename,clip_name,clip_type,vae_name) VALUES(?,?,?,?,?,?)').run('Krea2 Turbo','unet','krea2_turbo_bf16.safetensors','qwen3vl_4b_bf16.safetensors','krea2','qwen_image_vae.safetensors');
           user=db.prepare('SELECT * FROM users WHERE id=?').get(row.lastInsertRowid);db.exec('COMMIT');
         }catch{db.exec('ROLLBACK');return err(res,409,'Setup could not be completed');}
@@ -77,7 +77,7 @@ export function createApp(options={}) {
         try{
           const row=db.prepare('SELECT * FROM invites WHERE id=?').get(invitation.id);
           if(!row||row.used_at||(row.expires_at&&Date.parse(row.expires_at)<=Date.now())){db.exec('ROLLBACK');return inputError(res,'Invalid or expired invite');}
-          const inserted=db.prepare('INSERT INTO users(username,password_hash,role,created_at) VALUES(?,?,?,?)').run(body.username,hashed,'user',now());
+          const inserted=db.prepare('INSERT INTO users(username,password_hash,role,created_at,preferences) VALUES(?,?,?,?,?)').run(body.username,hashed,'user',now(),JSON.stringify({theme:'light',language:'zh'}));
           db.prepare('UPDATE invites SET used_at=?,used_by=? WHERE id=?').run(now(),inserted.lastInsertRowid,row.id);
           user=db.prepare('SELECT * FROM users WHERE id=?').get(inserted.lastInsertRowid);db.exec('COMMIT');
         }catch(error){db.exec('ROLLBACK');return err(res,String(error).includes('UNIQUE')?409:400,'Registration could not be completed');}

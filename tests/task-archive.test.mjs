@@ -27,8 +27,26 @@ test('fails with conflict when any image file is missing', async () => {
   const task = { id: 'task-2', user_id: 7, name: 'x', created_at: new Date().toISOString(), params: '{}' }; const batch = { id: 'b', model_name: 'M', prompt: 'p', negative_prompt: '', params: '{}', status: 'completed' }; const res = response(); await exportTaskArchive({ res, db: dbFixture({ task, batches: [batch], images: [{ id: 'i', batch_id: 'b', image_index: 0, path: '/definitely/missing.png' }] }), user: { id: 7 }, taskId: task.id }); assert.equal(res.status, 409); assert.match(res.headers['content-type'], /json/);
 });
 
-test('rejects symlink and outside-root image paths', async () => {
-  const dir = await mkdtemp(join(tmpdir(), 'nibiru-archive-root-')); const outside = join(dir, 'outside.png'); const link = join(dir, 'link.png'); await writeFile(outside, Buffer.from('x')); await symlink(outside, link);
+test('rejects outside-root image paths without requiring symlinks', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'nibiru-outside-'));
+  try {
+    const outside = join(dir, 'outside.png'); await writeFile(outside, Buffer.from('private'));
+    const task = {id:'outside-task',user_id:7,params:'{}'};
+    const batch = {id:'outside-batch',status:'completed',params:'{}'};
+    const res = response();
+    await exportTaskArchive({res,db:dbFixture({task,batches:[batch],images:[{id:'outside-image',batch_id:batch.id,path:outside}]}),user:{id:7},taskId:task.id,imageDir:join(dir,'images')});
+    assert.equal(res.status,409);
+    assert.equal(res.body.includes(Buffer.from('private')),false);
+  } finally {await rm(dir,{recursive:true,force:true});}
+});
+
+test('rejects symlink image paths', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'nibiru-archive-root-')); const outside = join(dir, 'outside.png'); const link = join(dir, 'link.png'); await writeFile(outside, Buffer.from('x'));
+  try { await symlink(outside, link); } catch(error) {
+    await rm(dir, {recursive:true,force:true});
+    if(process.platform==='win32'&&error.code==='EPERM'){t.skip('Windows file symlink creation requires Developer Mode or symlink privileges');return;}
+    throw error;
+  }
   try { const task = { id: 'task-3', user_id: 7, name: 'x', created_at: new Date().toISOString(), params: '{}' }; const batch = { id: 'b', model_name: 'M', prompt: 'p', negative_prompt: '', params: '{}', status: 'completed' }; const row = { id: 'i', batch_id: 'b', image_index: 0, path: link, filename: 'x.png' }; const res = response(); await exportTaskArchive({ res, db: dbFixture({ task, batches: [batch], images: [row] }), user: { id: 7 }, taskId: task.id, imageDir: dir }); assert.equal(res.status, 409); } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

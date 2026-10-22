@@ -1,18 +1,19 @@
 import { mkdirSync, chmodSync, existsSync, realpathSync, statSync } from 'node:fs';
-import { join, resolve, relative, sep } from 'node:path';
+import { join, resolve } from 'node:path';
 import {fileURLToPath} from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+import { isWithinDirectory } from './path-safety.mjs';
 
 export function openDb(dataDir) {
   const resolved=resolve(dataDir); const publicRoot=realpathSync(fileURLToPath(new URL('../public',import.meta.url)));
-  if(resolved===publicRoot||relative(publicRoot,resolved).startsWith(`..${sep}`)===false) throw new Error('DATA_DIR cannot be inside public');
+  if(isWithinDirectory(publicRoot,resolved)) throw new Error('DATA_DIR cannot be inside public');
   mkdirSync(resolved, { recursive: true, mode:0o700 });
-  const actual=realpathSync(resolved);if(actual===publicRoot||actual.startsWith(publicRoot+sep))throw new Error('DATA_DIR cannot be inside public');
+  const actual=realpathSync(resolved);if(isWithinDirectory(publicRoot,actual))throw new Error('DATA_DIR cannot be inside public');
   chmodSync(resolved,0o700);
   const dbPath=join(resolved, 'nibiru.sqlite'); const db = new DatabaseSync(dbPath);
   chmodSync(dbPath,0o600);
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
-    CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'user', disabled INTEGER NOT NULL DEFAULT 0, preferences TEXT NOT NULL DEFAULT '{"theme":"system","language":"zh"}', created_at TEXT NOT NULL, last_login_at TEXT);
+    CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'user', disabled INTEGER NOT NULL DEFAULT 0, preferences TEXT NOT NULL DEFAULT '{"theme":"light","language":"zh"}', created_at TEXT NOT NULL, last_login_at TEXT);
     CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS invites (id INTEGER PRIMARY KEY, code TEXT UNIQUE NOT NULL, created_at TEXT NOT NULL, expires_at TEXT, used_at TEXT, used_by INTEGER REFERENCES users(id));
     CREATE TABLE IF NOT EXISTS models (id INTEGER PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL, filename TEXT NOT NULL, clip_name TEXT, clip_type TEXT, vae_name TEXT, enabled INTEGER NOT NULL DEFAULT 1);

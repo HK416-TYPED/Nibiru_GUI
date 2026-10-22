@@ -7,9 +7,10 @@
     "node": ">=24"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "start": "node scripts/start-local.mjs",
+    "doctor": "node scripts/doctor.mjs",
     "dev": "node --env-file-if-exists=.env --watch server/index.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/test.mjs",
     "check": "node scripts/check.mjs",
     "setup:admin": "node --env-file-if-exists=.env setup-admin.mjs"
   }

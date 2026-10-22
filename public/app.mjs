@@ -3,21 +3,24 @@ import {taskParameters} from './task-state.mjs';
 import {disposeTaskExports} from './tasks.mjs';
 import { renderAuth, renderWorkspace } from './views.mjs';
 import { el, button, t, icon } from './ui.mjs';
+import {generationBlock} from './workspace-state.mjs';
 
 const app = document.querySelector('#app');
 const defaults = { prompt:'', negativePrompt:'bad quality,worst quality', modelId:'', batchSize:1, repeat:1, width:1024, height:1024, steps:8, cfg:1, sampler:'euler', scheduler:'simple', seed:-1, denoise:1 };
 const state = {
   user:null, setupRequired:false, authMode:'login', authBusy:false, models:[], capabilities:{}, batches:[],
-  activeBatchId:null, activeView:'generate', language:'zh', theme:'system', loading:false,
+  activeBatchId:null, activeView:'generate', language:'zh', theme:'light', loading:false,
   draft:{...defaults}, advanced:false, historyFilters:{q:'',date:'',sort:'desc'}, historyBatches:[],
   taskParams:taskParameters(defaults),taskPresetId:null,taskParamsExpanded:false,presetEditor:null,presetSaveBusy:false,historySelection:[],
   tasks:[], taskDraft:{name:'',text:'',parseMode:'lines',gridColumns:4,gridLabels:true}, taskBusy:false, selectedTaskId:null, imageIndices:{}, imageView:'grid',
   adminDefaults:null,adminData:null, adminTab:'models', railOpen:false, presets:[], activePresetId:null, presetName:'', presetBusy:false,
+  heroCollapsed:false,navCollapsed:false,navOpen:false,
 };
 let pollBusy = false;
 let filterTimer;
 let historyRequest = 0;
 let lastCapabilitiesAt = Date.now();
+let composing=false,renderPending=false;
 const media = matchMedia('(prefers-color-scheme: dark)');
 
 let sessionEpoch=0;
@@ -80,8 +83,12 @@ function layoutPreview(){
 const previewObserver=new ResizeObserver(layoutPreview);
 app.addEventListener('load',event=>{if(event.target.matches?.('.result-grid img'))layoutPreview();},true);
 function render() {
+  if(composing){renderPending=true;return;}
+  renderPending=false;
   const active = document.activeElement;
-  const focus = active?.name ? { name:active.name, start:active.selectionStart, end:active.selectionEnd } : null;
+  const focus = active?.name ? { name:active.name, start:active.selectionStart, end:active.selectionEnd,scroll:active.scrollTop } : null;
+  const focusLabel=active?.getAttribute('aria-label');
+  const scroll=app.querySelector('.center-stage')?.scrollTop;
   document.documentElement.dataset.theme = state.theme === 'system' ? (media.matches ? 'dark' : 'light') : state.theme;
   document.documentElement.lang = state.language === 'en' ? 'en' : 'zh-CN';
   app.replaceChildren(state.user ? renderWorkspace(state,actions) : renderAuth(state,actions));
@@ -91,10 +98,14 @@ function render() {
   toastLayoutObserver.disconnect();
   for(const node of app.querySelectorAll('.composer,.canvas-wrap,.canvas-result-foot'))toastLayoutObserver.observe(node);
   positionToasts();
+  const stage=app.querySelector('.center-stage');if(stage&&scroll)stage.scrollTop=scroll;
   if (focus) {
     const input = [...app.querySelectorAll('[name]')].find(n=>n.name===focus.name);
-    if (input) { input.focus({preventScroll:true}); try { input.setSelectionRange(focus.start,focus.end); } catch {} }
+    if (input) { input.focus({preventScroll:true});input.scrollTop=focus.scroll; try { input.setSelectionRange(focus.start,focus.end); } catch {} }
   }
+  else if(focusLabel){[...app.querySelectorAll('button[aria-label]')].find(node=>node.getAttribute('aria-label')===focusLabel)?.focus({preventScroll:true});}
+  const overlay=state.navOpen?app.querySelector('.side-nav'):state.railOpen&&matchMedia('(max-width:1279px)').matches?app.querySelector('.right-rail'):null;
+  if(overlay){for(const sibling of overlay.parentElement.children)if(sibling!==overlay&&!sibling.matches('.nav-scrim,.queue-scrim'))sibling.inert=true;if(!overlay.contains(document.activeElement))overlay.querySelector('button')?.focus();}
 }
 async function refreshBatches() {
   const data = await request('/api/batches?sort=desc');
@@ -104,7 +115,7 @@ async function refreshBatches() {
   return changed;
 }
 async function loadWorkspace() {
-  state.theme = state.user.preferences?.theme || 'system'; state.language = state.user.preferences?.language || 'zh';
+  state.theme = state.user.preferences?.theme || 'light'; state.language = state.user.preferences?.language || 'zh';
   const [models,caps,saved] = await Promise.all([request('/api/models'),request('/api/capabilities'),request('/api/presets')]);
   state.models = models.models; state.capabilities = caps; state.imageView=state.user.preferences?.imageView||'grid';
   state.presets=saved.presets; state.activePresetId=saved.activePresetId;
@@ -116,8 +127,8 @@ async function loadWorkspace() {
   if(selected && !state.models.some(m=>String(m.id)===String(state.draft.modelId))) {
     state.draft.modelId=''; toast(t(state,'预设中的模型不可用，请选择模型','The preset model is unavailable. Choose a model.'));
   }
-  try { const visible=localStorage.getItem(`nibiru.rail.${state.user.id}`); state.railOpen=visible===null?matchMedia('(min-width:1025px)').matches:visible==='true'; }
-  catch { state.railOpen=matchMedia('(min-width:1025px)').matches; }
+  try { const visible=localStorage.getItem(`nibiru.rail.${state.user.id}`); state.railOpen=matchMedia('(min-width:1280px)').matches&&visible!=='false';state.heroCollapsed=localStorage.getItem(`nibiru.hero.${state.user.id}`)==='compact'; }
+  catch { state.railOpen=matchMedia('(min-width:1280px)').matches; }
   await refreshBatches();
 }
 async function loadHistory() {
@@ -128,6 +139,9 @@ async function loadHistory() {
 }
 const actions = {
   toast,
+  setComposing(value){composing=value;if(!value&&renderPending)queueMicrotask(render);},
+  toggleHero(){state.heroCollapsed=!state.heroCollapsed;try{localStorage.setItem(`nibiru.hero.${state.user.id}`,state.heroCollapsed?'compact':'expanded');}catch{} render();app.querySelector('.hero-toggle')?.focus({preventScroll:true});},
+  toggleNav(){if(matchMedia('(max-width:760px)').matches){state.navOpen=!state.navOpen;if(state.navOpen)state.railOpen=false;}else state.navCollapsed=!state.navCollapsed;render();if(!state.navOpen)app.querySelector('.nav-toggle')?.focus({preventScroll:true});},
   setAuthMode(mode) { state.authMode = mode; render(); },
   async auth(form) {
     const payload = Object.fromEntries(new FormData(form));
@@ -144,17 +158,17 @@ const actions = {
     catch(error){toast(error.message);}
   },
   async navigate(view) {
-    document.body.classList.remove('nav-open');state.activeView=view;
+    document.body.classList.remove('nav-open');state.navOpen=false;state.activeView=view;
     try { if(view==='history'){await refreshBatches();await loadHistory();} if(view==='settings')state.presets=(await request('/api/presets')).presets; if(view==='tasks')state.tasks=(await request('/api/tasks')).tasks; if(view==='admin'){state.adminData=await request('/api/admin/overview');state.adminDefaults=(await request('/api/admin/workspace-defaults')).defaults;state.presets=(await request('/api/presets')).presets;} } catch(error){toast(error.message);}
     render();
   },
   newIdea() { state.draft.prompt=''; render(); document.querySelector('[name=prompt]')?.focus(); },
-  setDraft(name,value) { state.draft[name] = value;if(name==='modelId')request('/api/preferences',{method:'PATCH',body:JSON.stringify({preferredModelId:value===''?null:Number(value)})}).catch(error=>toast(error.message)); },
+  setDraft(name,value) { state.draft[name] = value;if(name==='modelId'){request('/api/preferences',{method:'PATCH',body:JSON.stringify({preferredModelId:value===''?null:Number(value)})}).catch(error=>toast(error.message));render();} },
   setAdvanced(value) { state.advanced = value; render(); },
   suggestion(prompt) { state.draft.prompt=prompt;render();document.querySelector('[name=prompt]')?.focus(); },
-  selectBatch(id) { state.activeBatchId=id;if(matchMedia('(max-width:1024px)').matches)state.railOpen=false;render(); },
-  toggleRail() { state.railOpen=!state.railOpen;try{localStorage.setItem(`nibiru.rail.${state.user.id}`,String(state.railOpen));}catch{} render(); },
-  async refresh() { try{await refreshBatches();render();}catch(error){toast(error.message);} },
+  selectBatch(id) { state.activeBatchId=id;if(matchMedia('(max-width:1279px)').matches)state.railOpen=false;render(); },
+  toggleRail() { state.railOpen=!state.railOpen;state.navOpen=false;try{localStorage.setItem(`nibiru.rail.${state.user.id}`,String(state.railOpen));}catch{} render();if(!state.railOpen)app.querySelector('.rail-toggle')?.focus({preventScroll:true}); },
+  async refresh() { try{const [,caps]=await Promise.all([refreshBatches(),request('/api/capabilities')]);state.capabilities=caps;lastCapabilitiesAt=Date.now();render();}catch(error){toast(error.message);} },
   setPresetName(value) { state.presetName=value; },
   async savePreset() {
     const name=state.presetName.trim();
@@ -180,6 +194,7 @@ const actions = {
     }catch(error){toast(error.message);}finally{state.presetBusy=false;render();}
   },
   async generate() {
+    if(generationBlock(state)||composing)return;
     const payload = {...state.draft};
     for(const key of ['batchSize','repeat','width','height','steps','cfg','seed','denoise'])payload[key]=Number(payload[key]);
     state.loading=true;render();
@@ -305,6 +320,13 @@ const actions = {
   },
 };
 media.addEventListener('change',()=>{if(state.theme==='system')render();});
+document.addEventListener('keydown',event=>{
+  const overlay=state.navOpen?app.querySelector('.side-nav'):state.railOpen&&matchMedia('(max-width:1279px)').matches?app.querySelector('.right-rail'):null;
+  if(!overlay)return;
+  if(event.key==='Escape'){event.preventDefault();state.navOpen?actions.toggleNav():actions.toggleRail();return;}
+  if(event.key==='Tab'){const items=[...overlay.querySelectorAll('button,a,input,select,textarea')].filter(node=>!node.disabled&&node.getClientRects().length);const first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+});
+matchMedia('(max-width:1279px)').addEventListener('change',()=>{state.railOpen=false;state.navOpen=false;if(state.user)render();});
 setInterval(async()=>{
   if(!state.user||pollBusy||document.hidden)return;pollBusy=true;
   try {let changed=await refreshBatches();if(Date.now()-lastCapabilitiesAt>30000){lastCapabilitiesAt=Date.now();const caps=await request('/api/capabilities');changed=changed||caps.online!==state.capabilities.online;state.capabilities=caps;}if(state.activeView==='tasks'){const tasks=(await request('/api/tasks')).tasks;changed=changed||JSON.stringify(tasks)!==JSON.stringify(state.tasks);state.tasks=tasks;}if(changed){if(state.activeView==='history')await loadHistory();render();}}catch(error){if(error.status===401)toast(error.message);}finally{pollBusy=false;}
